@@ -15,9 +15,13 @@ export class DockLocation {
     }
 
     /** @internal */
-    static getLocation(rect: Rect, x: number, y: number) {
+    static getLocation(rect: Rect, x: number, y: number, rtl: boolean = false) {
         x = (x - rect.x) / rect.width;
         y = (y - rect.y) / rect.height;
+
+        if (rtl) {
+            x = 1 - x;
+        }
 
         if (x >= 0.25 && x < 0.75 && y >= 0.25 && y < 0.75) {
             return DockLocation.CENTER;
@@ -74,16 +78,24 @@ export class DockLocation {
     }
 
     /** @internal */
-    getDockRect(r: Rect) {
+    getDockRect(r: Rect, rtl: boolean = false) {
         if (this === DockLocation.TOP) {
             return new Rect(r.x, r.y, r.width, r.height / 2);
         } else if (this === DockLocation.BOTTOM) {
             return new Rect(r.x, r.getBottom() - r.height / 2, r.width, r.height / 2);
         }
         if (this === DockLocation.LEFT) {
-            return new Rect(r.x, r.y, r.width / 2, r.height);
+            if (rtl) {
+                return new Rect(r.getRight() - r.width / 2, r.y, r.width / 2, r.height);
+            } else {
+                return new Rect(r.x, r.y, r.width / 2, r.height);
+            }
         } else if (this === DockLocation.RIGHT) {
-            return new Rect(r.getRight() - r.width / 2, r.y, r.width / 2, r.height);
+            if (rtl) {
+                return new Rect(r.x, r.y, r.width / 2, r.height);
+            } else {
+                return new Rect(r.getRight() - r.width / 2, r.y, r.width / 2, r.height);
+            }
         } else {
             return r.clone();
         }

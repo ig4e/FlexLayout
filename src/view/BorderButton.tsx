@@ -132,9 +132,9 @@ export const BorderButton = (props: IBorderButtonProps) => {
     let iconAngle = 0;
     if (node.getModel().isEnableRotateBorderIcons() === false) {
         if (border === "left") {
-            iconAngle = 90;
+            iconAngle = node.getModel().isRtl() ? -90 : 90;
         } else if (border === "right") {
-            iconAngle = -90;
+            iconAngle = node.getModel().isRtl() ? 90 : -90;
         }
     }
 

@@ -1,3 +1,7 @@
+# FlexLayout RTL Changelog
+
+*This is a fork of the original FlexLayout project by Caplin Systems Ltd, maintained by ig4e (ahmed badr) with RTL language support enhancements.*
+
 ## 0.8.17 - 2025-05-03
 
 * **Fixed:** Issues with tab redraw and scroll when page is scrolled down (corrects fix for [#488])

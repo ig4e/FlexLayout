@@ -275,6 +275,38 @@
             }
         }
 
+        &__rtl {
+            .flexlayout__tabset_header {
+                padding: 3px 5px 3px 3px;
+            }
+
+            .flexlayout__tab_toolbar {
+                padding-left: .3em;
+                padding-right: .5em;
+            }
+
+            .flexlayout__tab_toolbar_sticky_buttons_container {
+                padding-left: 0px;
+                padding-right: 5px;
+            }
+
+            .flexlayout__tab_button_textbox {
+                border: 1px inset var(--color-1);
+            }
+
+            .flexlayout__border_inner_tab_container_left {
+                flex-direction: row; 
+                transform-origin: top left;
+                transform: rotate(90deg);
+            }
+
+            .flexlayout__border_inner_tab_container_right {
+                flex-direction: row-reverse;
+                transform-origin: top right;
+                transform: rotate(-90deg);
+            }
+        }
+
         &__tab_button_stamp {
             display: inline-flex;
             align-items: center;

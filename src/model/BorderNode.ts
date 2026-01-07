@@ -239,6 +239,7 @@ export class BorderNode extends Node implements IDropTarget {
         const dockLocation = DockLocation.CENTER;
 
         if (this.tabHeaderRect!.contains(x, y)) {
+            const rtl = this.model.isRtl();
             if (this.location.orientation === Orientation.VERT) {
                 if (this.children.length > 0) {
                     let child = this.children[0];
@@ -247,22 +248,31 @@ export class BorderNode extends Node implements IDropTarget {
 
                     const childHeight = childRect.height;
 
-                    let pos = this.tabHeaderRect!.x;
+                    let pos = rtl ? this.tabHeaderRect!.getRight() : this.tabHeaderRect!.x;
                     let childCenter = 0;
                     for (let i = 0; i < this.children.length; i++) {
                         child = this.children[i];
                         childRect = (child as TabNode).getTabRect()!;
                         childCenter = childRect.x + childRect.width / 2;
-                        if (x >= pos && x < childCenter) {
+                        if (!rtl && x >= pos && x < childCenter) {
                             const outlineRect = new Rect(childRect.x - 2, childY, 3, childHeight);
+                            dropInfo = new DropInfo(this, outlineRect, dockLocation, i, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                            break;
+                        } else if (rtl && x <= pos && x > childCenter) {
+                            const outlineRect = new Rect(childRect.getRight() - 1, childY, 3, childHeight);
                             dropInfo = new DropInfo(this, outlineRect, dockLocation, i, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
                             break;
                         }
                         pos = childCenter;
                     }
                     if (dropInfo == null) {
-                        const outlineRect = new Rect(childRect.getRight() - 2, childY, 3, childHeight);
-                        dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                        if (!rtl) {
+                            const outlineRect = new Rect(childRect.getRight() - 2, childY, 3, childHeight);
+                            dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                        } else {
+                            const outlineRect = new Rect(childRect.x - 1, childY, 3, childHeight);
+                            dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                        }
                     }
                 } else {
                     const outlineRect = new Rect(this.tabHeaderRect!.x + 1, this.tabHeaderRect!.y + 2, 3, 18);
@@ -355,22 +365,33 @@ export class BorderNode extends Node implements IDropTarget {
         const rootRow = this.model.getRoot(Model.MAIN_WINDOW_ID);
         const innerRect = rootRow.getRect();
         const splitterSize = this.model.getSplitterSize()
-        if (this.location === DockLocation.TOP) {
+        const rtl = this.model.isRtl();
+
+        let location = this.location;
+        if (rtl) {
+            if (this.location === DockLocation.LEFT) {
+                location = DockLocation.RIGHT;
+            } else if (this.location === DockLocation.RIGHT) {
+                location = DockLocation.LEFT;
+            }
+        }
+
+        if (location === DockLocation.TOP) {
             pBounds[0] = this.tabHeaderRect!.getBottom() + minSize;
             const maxPos = this.tabHeaderRect!.getBottom() + maxSize;
             pBounds[1] = Math.max(pBounds[0], innerRect.getBottom() - rootRow.getMinHeight() - splitterSize);
             pBounds[1] = Math.min(pBounds[1], maxPos);
-        } else if (this.location === DockLocation.LEFT) {
+        } else if (location === DockLocation.LEFT) {
             pBounds[0] = this.tabHeaderRect!.getRight() + minSize;
             const maxPos = this.tabHeaderRect!.getRight() + maxSize;
             pBounds[1] = Math.max(pBounds[0], innerRect.getRight() - rootRow.getMinWidth() - splitterSize);
             pBounds[1] = Math.min(pBounds[1], maxPos);
-        } else if (this.location === DockLocation.BOTTOM) {
+        } else if (location === DockLocation.BOTTOM) {
             pBounds[1] = this.tabHeaderRect!.y - minSize - splitterSize;
             const maxPos = this.tabHeaderRect!.y - maxSize - splitterSize;
             pBounds[0] = Math.min(pBounds[1], innerRect.y + rootRow.getMinHeight());
             pBounds[0] = Math.max(pBounds[0], maxPos);
-        } else if (this.location === DockLocation.RIGHT) {
+        } else if (location === DockLocation.RIGHT) {
             pBounds[1] = this.tabHeaderRect!.x - minSize - splitterSize;
             const maxPos = this.tabHeaderRect!.x - maxSize - splitterSize;
             pBounds[0] = Math.min(pBounds[1], innerRect.x + rootRow.getMinWidth());
@@ -382,7 +403,15 @@ export class BorderNode extends Node implements IDropTarget {
     /** @internal */
     calculateSplit(splitter: BorderNode, splitterPos: number) {
         const pBounds = this.getSplitterBounds(splitterPos);
-        if (this.location === DockLocation.BOTTOM || this.location === DockLocation.RIGHT) {
+        let location = this.location;
+        if (this.model.isRtl()) {
+            if (this.location === DockLocation.LEFT) {
+                location = DockLocation.RIGHT;
+            } else if (this.location === DockLocation.RIGHT) {
+                location = DockLocation.LEFT;
+            }
+        }
+        if (location === DockLocation.BOTTOM || location === DockLocation.RIGHT) {
             return Math.max(0, pBounds[1] - splitterPos);
         } else {
             return Math.max(0, splitterPos - pBounds[0]);

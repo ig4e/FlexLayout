@@ -333,6 +333,10 @@ export class Model {
         return this.attributes.rootOrientationVertical as boolean;
     }
 
+    isRtl() {
+        return this.attributes.enableRtl as boolean;
+    }
+
     isEnableRotateBorderIcons() {
         return this.attributes.enableRotateBorderIcons as boolean;
     }
@@ -626,6 +630,9 @@ export class Model {
     private static createAttributeDefinitions(): AttributeDefinitions {
         const attributeDefinitions = new AttributeDefinitions();
 
+        attributeDefinitions.add("enableRtl", false).setType(Attribute.BOOLEAN).setDescription(
+            `enable right-to-left layout`
+        );
         attributeDefinitions.add("enableEdgeDock", true).setType(Attribute.BOOLEAN).setDescription(
             `enable docking to the edges of the layout, this will show the edge indicators`
         );

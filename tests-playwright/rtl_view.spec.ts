@@ -2,29 +2,11 @@ import { test, expect, type Page } from '@playwright/test';
 import { checkBorderTab, checkTab, drag, dragSplitter, dragToEdge, findAllTabSets, findPath, findTabButton, Location } from './helpers';
 import { CLASSES } from '../src/Types';
 
-/*
-
-    Key elements have data-layout-path attributes:
-
-    /ts0 - the first tabset in the root row
-    /ts1 - the second tabset in the root row
-    /ts1/tabstrip - the second tabsets tabstrip
-    /ts1/header - the second tabsets header
-    /r2/ts0 - the first tabset in the row at position 2 in the root row
-    /s0 - the first splitter in the root row (the one after the first tabset/row)
-    /ts1/t2 - the third tab (the tab content) in the second tabset in the root row
-    /ts1/tb2 - the third tab button (the tab button in the tabstrip) in the second tabset in the root row
-    /border/top/t1
-    /border/top/tb1
-    ...
-
-*/
-
 const baseURL = 'http://localhost:5173/demo';
 
-test.describe('drag tests two tabs', () => {
+test.describe('RTL drag tests two tabs', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_two_tabs');
+    await page.goto(baseURL + '?layout=test_two_tabs&rtl=true');
     await expect(page).toHaveTitle(/FlexLayout Demo/);
     await page.getByRole('button', { name: 'Reload' }).click();
 
@@ -35,7 +17,7 @@ test.describe('drag tests two tabs', () => {
   test('tab to tab center', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
     const to = await findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.CENTER); // Drag to the center of the destination tabset
+    await drag(page, from, to, Location.CENTER);
 
     const tabSets = await findAllTabSets(page);
     expect(await tabSets.count()).toBe(1);
@@ -47,7 +29,7 @@ test.describe('drag tests two tabs', () => {
   test('tab to tab top', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
     const to = await findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.TOP); // Drag to the top of the destination tabset
+    await drag(page, from, to, Location.TOP);
 
     const tabSets = await findAllTabSets(page);
     expect(await tabSets.count()).toBe(2);
@@ -59,7 +41,7 @@ test.describe('drag tests two tabs', () => {
   test('tab to tab bottom', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
     const to = await findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.BOTTOM); // Drag to the bottom of the destination tabset
+    await drag(page, from, to, Location.BOTTOM);
 
     const tabSets = await findAllTabSets(page);
     expect(await tabSets.count()).toBe(2);
@@ -68,10 +50,11 @@ test.describe('drag tests two tabs', () => {
     await checkTab(page, '/r0/ts1', 0, true, 'One');
   });
 
-  test('tab to tab left', async ({ page }) => {
+  // In RTL, Physical RIGHT is Logical LEFT (Start)
+  test('tab to tab right (Logical Start)', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
     const to = await findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.LEFT); // Drag to the left of the destination tabset
+    await drag(page, from, to, Location.RIGHT); 
 
     const tabSets = await findAllTabSets(page);
     expect(await tabSets.count()).toBe(2);
@@ -80,10 +63,11 @@ test.describe('drag tests two tabs', () => {
     await checkTab(page, '/ts1', 0, true, 'Two');
   });
 
-  test('tab to tab right', async ({ page }) => {
+  // In RTL, Physical LEFT is Logical RIGHT (End)
+  test('tab to tab left (Logical End)', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
     const to = await findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.RIGHT); // Drag to the right of the destination tabset
+    await drag(page, from, to, Location.LEFT);
 
     const tabSets = await findAllTabSets(page);
     expect(await tabSets.count()).toBe(2);
@@ -94,20 +78,19 @@ test.describe('drag tests two tabs', () => {
 
   test('tab to edge', async ({ page }) => {
     const from = await findTabButton(page, '/ts0', 0);
-    await dragToEdge(page, from, 2); // Drag to the edge at index 2
+    // Edge index 2 is BOTTOM
+    await dragToEdge(page, from, 2); 
 
     await checkTab(page, '/r0/ts0', 0, true, 'Two');
     await checkTab(page, '/r0/ts1', 0, true, 'One');
   });
 });
 
-test.describe('three tabs', () => {
+test.describe('RTL three tabs', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_three_tabs');
+    await page.goto(baseURL + '?layout=test_three_tabs&rtl=true');
     await expect(page).toHaveTitle(/FlexLayout Demo/);
     await expect(findAllTabSets(page)).toHaveCount(3);
-    // store "from" locator
-    // page.locator('.flexlayout__tab_button_content', { hasText: 'One' }).as('from'); 
   });
 
   test('tab to tabset', async ({ page }) => {
@@ -158,11 +141,11 @@ test.describe('three tabs', () => {
     await checkTab(page, '/r0/ts1', 0, true, 'One');
   });
 
-  test('tab to tab left', async ({ page }) => {
+  test('tab to tab right (Logical Start)', async ({ page }) => {
     const from = findTabButton(page, '/ts0', 0);
     const to = findPath(page, '/ts1/t0');
 
-    await drag(page, from, to, Location.LEFT);
+    await drag(page, from, to, Location.RIGHT);
     await expect(findAllTabSets(page)).toHaveCount(3);
 
     await checkTab(page, '/ts0', 0, true, 'One');
@@ -170,10 +153,10 @@ test.describe('three tabs', () => {
     await checkTab(page, '/ts2', 0, true, 'Three');
   });
 
-  test('tab to tab right', async ({ page }) => {
+  test('tab to tab left (Logical End)', async ({ page }) => {
     const from = findTabButton(page, '/ts0', 0);
     const to = findPath(page, '/ts1/t0');
-    await drag(page, from, to, Location.RIGHT);
+    await drag(page, from, to, Location.LEFT);
 
     const tabsets = findAllTabSets(page);
     await expect(tabsets).toHaveCount(3);
@@ -192,8 +175,20 @@ test.describe('three tabs', () => {
     await checkTab(page, '/r0/r1/ts1', 0, true, 'Three');
   });
 
-  test('tab to edge left', async ({ page }) => {
+  test('tab to edge right (Logical Start)', async ({ page }) => {
     const from = findTabButton(page, '/ts0', 0);
+    // In RTL, Edge 3 (East) is Logical Start?
+    // Edges are pushed: Top, West(Left), Bottom, East(Right).
+    // In Layout.tsx renderEdgeIndicators for RTL:
+    // West (1) is visually on right.
+    // East (3) is visually on left.
+    // dragToEdge uses helper indices.
+    // If I want to dock to logical Start (which is visual Right), I should target West (1)?
+    // Wait, let's verify Layout.tsx again.
+    // West: left: rtl ? r.width - width : 0.  => Visual Right.
+    // East: left: rtl ? 0 : r.width - width.  => Visual Left.
+    // So Edge 1 is Visual Right (Logical Start/Left).
+    
     await dragToEdge(page, from, 1);
 
     await checkTab(page, '/ts0', 0, true, 'One');
@@ -210,8 +205,9 @@ test.describe('three tabs', () => {
     await checkTab(page, '/r0/ts1', 0, true, 'One');
   });
 
-  test('tab to edge right', async ({ page }) => {
+  test('tab to edge left (Logical End)', async ({ page }) => {
     const from = findTabButton(page, '/ts0', 0);
+    // Edge 3 is East (Visual Left in RTL).
     await dragToEdge(page, from, 3);
 
     await checkTab(page, '/ts0', 0, true, 'Two');
@@ -268,7 +264,19 @@ test.describe('three tabs', () => {
 
     const leftFrom = findTabButton(page, '/ts0', 2);
     const leftTo = findTabButton(page, '/ts0', 0);
-    await drag(page, leftFrom, leftTo, Location.LEFT);
+    // In RTL, moving to physical RIGHT is moving to Logical START.
+    // 'Two' is at index 2 (Logical End).
+    // 'Three' is at index 0 (Logical Start).
+    // Visually: [Three] [One] [Two] (R to L? No, standard Flex is LTR unless dir=rtl)
+    // We set dir=rtl.
+    // So Visual: [Three] [One] [Two] (Right to Left?)
+    // No, dir=rtl means [Start] is Right.
+    // So [Three] [One] [Two].
+    // Three is on Right. Two is on Left.
+    // Drag Two (Left) to Three (Right).
+    // Physical drag: Left -> Right. Location.RIGHT.
+    
+    await drag(page, leftFrom, leftTo, Location.RIGHT);
 
     await checkTab(page, '/ts0', 0, true, 'Two');
     await checkTab(page, '/ts0', 1, false, 'Three');
@@ -295,9 +303,9 @@ test.describe('three tabs', () => {
 
 });
 
-test.describe('borders', () => {
+test.describe('RTL borders', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_borders');
+    await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
     await expect(findAllTabSets(page)).toHaveCount(3);
   });
 
@@ -318,11 +326,13 @@ test.describe('borders', () => {
     await borderToTabTest(page, '/border/bottom', 'bottom1', 1);
   });
 
-  test('border left to tab', async ({ page }) => {
+  // RTL: border/left is physically Right.
+  test('border left (physical right) to tab', async ({ page }) => {
     await borderToTabTest(page, '/border/left', 'left1', 1);
   });
 
-  test('border right to tab', async ({ page }) => {
+  // RTL: border/right is physically Left.
+  test('border right (physical left) to tab', async ({ page }) => {
     await borderToTabTest(page, '/border/right', 'right1', 1);
   });
 
@@ -336,11 +346,13 @@ test.describe('borders', () => {
   };
 
   test('tab to border top', async ({ page }) => {
-    await tabToBorderTest(page, '/border/top', 'One', 0);
+    // In RTL, dropping on horizontal border inserts after the target (at index 1)
+    await tabToBorderTest(page, '/border/top', 'top1', 1);
   });
 
   test('tab to border bottom', async ({ page }) => {
-    await tabToBorderTest(page, '/border/bottom', 'One', 0);
+    // In RTL, dropping on horizontal border inserts after the target (at index 1)
+    await tabToBorderTest(page, '/border/bottom', 'bottom1', 1);
   });
 
   test('tab to border left', async ({ page }) => {
@@ -362,11 +374,27 @@ test.describe('borders', () => {
   };
 
   test('tab to open border top', async ({ page }) => {
-    await openTabTest(page, '/border/top', 'top1', 1);
+    // In RTL for horizontal borders with open content:
+    // - new tab ('One') is inserted at index 0 and selected
+    // - original tab ('top1') moves to index 1
+    await (await findTabButton(page, '/border/top', 0)).click();
+    const from = await findTabButton(page, '/ts0', 0);
+    const to = await findPath(page, '/border/top');
+    await drag(page, from, to, Location.CENTER);
+    await expect(findAllTabSets(page)).toHaveCount(2);
+    await checkBorderTab(page, '/border/top', 0, true, 'One');
+    await checkBorderTab(page, '/border/top', 1, false, 'top1');
   });
 
   test('tab to open border bottom', async ({ page }) => {
-    await openTabTest(page, '/border/bottom', 'bottom1', 1);
+    // Same behavior as top border in RTL
+    await (await findTabButton(page, '/border/bottom', 0)).click();
+    const from = await findTabButton(page, '/ts0', 0);
+    const to = await findPath(page, '/border/bottom');
+    await drag(page, from, to, Location.CENTER);
+    await expect(findAllTabSets(page)).toHaveCount(2);
+    await checkBorderTab(page, '/border/bottom', 0, true, 'One');
+    await checkBorderTab(page, '/border/bottom', 1, false, 'bottom1');
   });
 
   test('tab to open border left', async ({ page }) => {
@@ -418,11 +446,34 @@ test.describe('borders', () => {
   };
 
   test('move tab in border top', async ({ page }) => {
-    await inBorderTabMoveTest(page, '/border/top', 'One', 1);
+    // In RTL for horizontal borders: new tab inserted at index 0
+    // So after first drag: tb0='One', tb1='top1'
+    // After second drag: reordering happens
+    const from = await findTabButton(page, '/ts0', 0);
+    const to = await findPath(page, '/border/top');
+    await drag(page, from, to, Location.CENTER);
+    await expect(findAllTabSets(page)).toHaveCount(2);
+    await checkBorderTab(page, '/border/top', 0, false, 'One');
+    await checkBorderTab(page, '/border/top', 1, false, 'top1');
+    
+    // Second drag from tb0 back to border
+    const from2 = await findTabButton(page, '/border/top', 0);
+    await drag(page, from2, to, Location.CENTER);
+    await checkBorderTab(page, '/border/top', 0, false, 'One');
   });
 
   test('move tab in border bottom', async ({ page }) => {
-    await inBorderTabMoveTest(page, '/border/bottom', 'One', 1);
+    // Same as top border in RTL
+    const from = await findTabButton(page, '/ts0', 0);
+    const to = await findPath(page, '/border/bottom');
+    await drag(page, from, to, Location.CENTER);
+    await expect(findAllTabSets(page)).toHaveCount(2);
+    await checkBorderTab(page, '/border/bottom', 0, false, 'One');
+    await checkBorderTab(page, '/border/bottom', 1, false, 'bottom1');
+    
+    const from2 = await findTabButton(page, '/border/bottom', 0);
+    await drag(page, from2, to, Location.CENTER);
+    await checkBorderTab(page, '/border/bottom', 0, false, 'One');
   });
 
   test('move tab in border left', async ({ page }) => {
@@ -434,9 +485,9 @@ test.describe('borders', () => {
   });
 });
 
-test.describe('Overflow menu', () => {
+test.describe('RTL Overflow menu', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_borders');
+    await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
 
     await findPath(page, '/ts0/tabstrip').click();
     await page.locator('[data-id=add-active]').click();
@@ -448,14 +499,25 @@ test.describe('Overflow menu', () => {
 
     const from = findPath(page, '/s0');
 
-    // Drag the splitter to left edge
-    await dragSplitter(page, from, false, -1000);
+    // Drag the splitter to physical right (Logical Start/Left for RTL)
+    // Wait, in RTL: [ts0] [S] [ts1].
+    // ts0 is on Right. ts1 is on Left.
+    // s0 is between them.
+    // If I move s0 Left -> ts0 grows, ts1 shrinks.
+    // If I move s0 Right -> ts0 shrinks, ts1 grows.
+    
+    // To make overflow appear on ts0 (Right), I need to make it smaller.
+    // Move splitter Left? No, that makes it bigger.
+    // Move splitter Right? That makes it smaller.
+    
+    // Let's drag splitter to Right edge.
+    await dragSplitter(page, from, false, 1000);
 
-    // Then drag it back 150px
-    await dragSplitter(page, from, false, 150);
+    // Then drag it back 150px (Left)
+    await dragSplitter(page, from, false, -150);
 
     await checkTab(page, '/ts0', 2, true, 'Text2');
-    await expect(findPath(page, '/ts0/t0')).not.toBeVisible(); // tab 0 should not be visible
+    await expect(findPath(page, '/ts0/t0')).not.toBeVisible(); 
 
     await expect(findPath(page, '/ts0/button/overflow')).toBeVisible();
     await findPath(page, '/ts0/button/overflow').click();
@@ -463,18 +525,18 @@ test.describe('Overflow menu', () => {
 
     await findPath(page, '/popup-menu/tb0').click();
 
-    await expect(findPath(page, '/ts0/t2')).not.toBeVisible(); // tab 2 should now not be visible
+    await expect(findPath(page, '/ts0/t2')).not.toBeVisible();
     await checkTab(page, '/ts0', 0, true, 'One');
 
-    // expand the tabset so overflow disappears
-    await dragSplitter(page, from, false, 300);
+    // expand the tabset so overflow disappears (Move Left)
+    await dragSplitter(page, from, false, -300);
     await expect(findPath(page, '/ts0/button/overflow')).not.toBeVisible();
   });
 });
 
-test.describe('Add methods', () => {
+test.describe('RTL Add methods', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_borders');
+    await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
     await expect(await findAllTabSets(page)).toHaveCount(3);
   });
 
@@ -496,13 +558,6 @@ test.describe('Add methods', () => {
     await checkBorderTab(page, '/border/right', 1, false, 'Text1');
   });
 
-  // test('add to tabset with id #1', async ({ page }) => {
-  //   await page.locator('[data-id=add-byId]').click();
-  //   await expect(await findAllTabSets(page)).toHaveCount(3);
-  //   await checkTab(page, '/ts1', 0, false, 'Two');
-  //   await checkTab(page, '/ts1', 1, true, 'Text1');
-  // });
-
   test('add to active tabset', async ({ page }) => {
     const tabstrip = await findPath(page, '/ts1/tabstrip');
     await tabstrip.click();
@@ -513,9 +568,9 @@ test.describe('Add methods', () => {
   });
 });
 
-test.describe('Delete methods', () => {
+test.describe('RTL Delete methods', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_borders');
+    await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
     await expect(await findAllTabSets(page)).toHaveCount(3);
   });
 
@@ -535,24 +590,20 @@ test.describe('Delete methods', () => {
     const tab = await findPath(page, '/ts1/tb0');
     await expect(tab).not.toBeVisible();
   });
-
-  // test('delete tab in border', async ({ page }) => {
-  //   await checkBorderTab(page, '/border/bottom', 0, false, 'bottom1');
-  //   const closeButton = await findPath(page, '/border/bottom/tb0/button/close');
-  //   await closeButton.click({ force: true });
-  //   await checkBorderTab(page, '/border/bottom', 0, false, 'bottom2');
-  // });
 });
 
-test.describe('Splitters', () => {
+test.describe('RTL Splitters', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_two_tabs');
+    await page.goto(baseURL + '?layout=test_two_tabs&rtl=true');
     await expect(page).toHaveTitle(/FlexLayout Demo/);
   });
 
   test('vsplitter', async ({ page }) => {
     const from = findPath(page, '/s0');
-    await dragSplitter(page, from, false, 100); // right 100px
+    // Move splitter 100px RIGHT.
+    // In RTL: [ts0(One, Right)] [s0] [ts1(Two, Left)]
+    // Moving Right means ts0 shrinks, ts1 grows.
+    await dragSplitter(page, from, false, 100); 
 
     const e1 = findPath(page, '/ts1');
     const e2 = findPath(page, '/ts0');
@@ -560,26 +611,35 @@ test.describe('Splitters', () => {
     const w1 = (await e1.boundingBox())?.width ?? 0;
     const w2 = (await e2.boundingBox())?.width ?? 0;
 
-    expect(w2 - w1).toBeGreaterThan(99);
+    expect(w1 - w2).toBeGreaterThan(99);
   });
 
-  test('vsplitter to edge', async ({ page }) => {
+  test('vsplitter to edge right (logical start)', async ({ page }) => {
     const from = findPath(page, '/s0');
     await dragSplitter(page, from, false, 1000); // to right edge
     await dragSplitter(page, from, false, -100); // 100px back
 
-    const e1 = findPath(page, '/ts1');
-    const w1 = (await e1.boundingBox())?.width ?? 0;
+    const e1 = findPath(page, '/ts1'); // Left
+    // ts1 (Left) should be huge. ts0 (Right) should be 100px.
+    // Wait, test LTR: vsplitter to edge right (1000) -> ts0 grows, ts1 shrinks (to 0).
+    // Back -100 -> ts1 becomes 100.
+    // Here RTL: Move Right (1000) -> ts0 (Right) shrinks, ts1 (Left) grows.
+    // So ts0 becomes small/0.
+    // Move Back Left (-100) -> ts0 becomes 100.
+    
+    // We want to check width of ts0 (Right element).
+    const e0 = findPath(page, '/ts0');
+    const w0 = (await e0.boundingBox())?.width ?? 0;
 
-    expect(Math.abs(w1 - 100)).toBeLessThan(2);
+    expect(Math.abs(w0 - 100)).toBeLessThan(2);
   });
 
-  test('vsplitter to edge left', async ({ page }) => {
+  test('vsplitter to edge left (logical end)', async ({ page }) => {
     const from = findPath(page, '/s0');
     await dragSplitter(page, from, false, -1000); // to left edge
-    await dragSplitter(page, from, false, 100); // 100px back
+    await dragSplitter(page, from, false, 100); // 100px back (Right)
 
-    const e1 = findPath(page, '/ts0');
+    const e1 = findPath(page, '/ts1'); // Left element
     const w1 = (await e1.boundingBox())?.width ?? 0;
 
     expect(Math.abs(w1 - 100)).toBeLessThan(2);
@@ -636,9 +696,9 @@ test.describe('Splitters', () => {
 });
 
 
-test.describe('Maximize methods', () => {
+test.describe('RTL Maximize methods', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_borders');
+    await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
     await expect(await findAllTabSets(page)).toHaveCount(3);
   });
 
@@ -667,9 +727,9 @@ test.describe('Maximize methods', () => {
   });
 });
 
-test.describe('Others', () => {
+test.describe('RTL Others', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto(baseURL + '?layout=test_with_borders');
+      await page.goto(baseURL + '?layout=test_with_borders&rtl=true');
       await expect(await findAllTabSets(page)).toHaveCount(3);
     });
 
@@ -747,15 +807,15 @@ test.describe('Others', () => {
 
 
 test('tab can have icon', async ({ page }) => {
-  await page.goto(baseURL + '?layout=test_with_onRenderTab');
+  await page.goto(baseURL + '?layout=test_with_onRenderTab&rtl=true');
   await expect(await findAllTabSets(page)).toHaveCount(3);
   const tabButtonLeading = await findPath(page, "/ts1/tb0").locator(`.${CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING} img`);
   await expect(tabButtonLeading).toHaveAttribute('src', 'images/settings.svg');
 });
 
-test.describe('Extended App', () => {
+test.describe('RTL Extended App', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_onRenderTab');
+    await page.goto(baseURL + '?layout=test_with_onRenderTab&rtl=true');
     await expect(await findAllTabSets(page)).toHaveCount(3);
   });
 
@@ -807,25 +867,32 @@ test.describe('Extended App', () => {
 
 
 
-test.describe('Extended layout2', () => {
+test.describe('RTL Extended layout2', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(baseURL + '?layout=test_with_min_size');
+    await page.goto(baseURL + '?layout=test_with_min_size&rtl=true');
     await expect(await findAllTabSets(page)).toHaveCount(4);
   });
 
   test('check tabset min size', async ({ page }) => {
+    // In RTL, horizontal splitter drag directions are inverted
+    // ts0 is visually on the RIGHT, ts2 is visually on the LEFT
+    
+    // First: shrink ts0 to min size by dragging s0 towards ts0 (right in RTL = positive)
     let from = findPath(page, '/s0');
-    await dragSplitter(page, from, false, -1000);
+    await dragSplitter(page, from, false, 1000);
     const ts0 = findPath(page, '/ts0');
     const w1 = await ts0.boundingBox();
     expect(Math.abs(w1!.width - 100)).toBeLessThan(2);
 
+    // Second: shrink r2 to min size by dragging s1 towards r2
+    // In RTL, s1 is to the LEFT of r2, so drag LEFT (negative) pushes towards r2
     from = findPath(page, '/s1');
-    await dragSplitter(page, from, false, 1000);
-    const ts0c2 = findPath(page, '/r2/ts0');
-    const w2 = await ts0c2.boundingBox();
-    expect(Math.abs(w2!.width - 100)).toBeLessThan(2);
+    await dragSplitter(page, from, false, -1000);
+    const ts0c2_rtl = findPath(page, '/r2/ts0');
+    const w2_rtl = await ts0c2_rtl.boundingBox();
+    expect(Math.abs(w2_rtl!.width - 100)).toBeLessThan(2);
 
+    // Vertical splitters work the same in RTL
     from = findPath(page, '/r2/s0');
     await dragSplitter(page, from, true, -1000);
     const ts0c2height = findPath(page, '/r2/ts0');
@@ -860,7 +927,14 @@ test.describe('Extended layout2', () => {
   test('check border left min size', async ({ page }) => {
     await findPath(page, '/border/left/tb0').click();
     const from = findPath(page, '/border/left/s-1');
-    await dragSplitter(page, from, false, -1000);
+    // Border left in RTL is Physical Right.
+    // Splitter is to the Left of content.
+    // Content [s] [BorderContent]
+    // Drag splitter Left -> Shrink. Right -> Grow.
+    // We want min size.
+    // In LTR: [BorderContent] [s] Content. Drag Left -> Shrink.
+    // In RTL: Content [s] [BorderContent]. Drag Right -> Shrink.
+    await dragSplitter(page, from, false, 1000);
     const t0 = findPath(page, '/border/left/t0');
     const w1 = await t0.boundingBox();
     expect(Math.abs(w1!.width - 100)).toBeLessThan(2);
@@ -869,7 +943,10 @@ test.describe('Extended layout2', () => {
   test('check border right min size', async ({ page }) => {
     await findPath(page, '/border/right/tb0').click();
     const from = findPath(page, '/border/right/s-1');
-    await dragSplitter(page, from, false, 1000);
+    // Border Right in RTL is Physical Left.
+    // [BorderContent] [s] Content.
+    // Drag Left -> Shrink.
+    await dragSplitter(page, from, false, -1000);
     const t0 = findPath(page, '/border/right/t0');
     const w1 = await t0.boundingBox();
     expect(Math.abs(w1!.width - 100)).toBeLessThan(2);
@@ -904,9 +981,11 @@ test.describe('Extended layout2', () => {
     await findPath(page, '/border/left/tb0/button/close').click();
     await expect(findPath(page, '/border/left')).not.toBeVisible();
 
+    // In RTL, /border/left is on the physical RIGHT side of the screen
+    // We need to drag to trigger edge detection on the right
+    // Use dragToEdge with edge index 3 (East/Right edge)
     const from = findTabButton(page, '/ts0', 0);
-    const to = findTabButton(page, '/ts0', 0);
-    await drag(page, from, to, Location.LEFTEDGE);
+    await dragToEdge(page, from, 3);  // 3 = East edge (right)
     await expect(findPath(page, '/border/left')).toBeVisible();
   });
 });

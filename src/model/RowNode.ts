@@ -98,37 +98,56 @@ export class RowNode extends Node implements IDropTarget {
     /** @internal */
     getSplitterBounds(index: number) {
         const h = this.getOrientation() === Orientation.HORZ;
+        const rtl = this.model.isRtl();
         const c = this.getChildren();
         const ss = this.model.getSplitterSize();
-        const fr = c[0].getRect();
-        const lr = c[c.length - 1].getRect();
-        let p = h ? [fr.x, lr.getRight()] : [fr.y, lr.getBottom()];
-        const q = h ? [fr.x, lr.getRight()] : [fr.y, lr.getBottom()];
+        
+        const rect = this.getRect();
+        let p = h ? [rect.x, rect.getRight()] : [rect.y, rect.getBottom()];
+        const q = h ? [rect.x, rect.getRight()] : [rect.y, rect.getBottom()];
 
-        for (let i = 0; i < index; i++) {
-            const n = c[i] as TabSetNode | RowNode;
-            p[0] += h ? n.getMinWidth() : n.getMinHeight();
-            q[0] += h ? n.getMaxWidth() : n.getMaxHeight();
-            if (i > 0) {
-                p[0] += ss;
-                q[0] += ss;
+        if (h && rtl) {
+            for (let i = c.length - 1; i >= index; i--) {
+                const n = c[i] as TabSetNode | RowNode;
+                p[0] += n.getMinWidth();
+                q[0] += n.getMaxWidth();
+                if (i < c.length - 1) {
+                    p[0] += ss;
+                    q[0] += ss;
+                }
+            }
+            for (let i = 0; i < index; i++) {
+                const n = c[i] as TabSetNode | RowNode;
+                p[1] -= n.getMinWidth() + ss;
+                q[1] -= n.getMaxWidth() + ss;
+            }
+        } else {
+            for (let i = 0; i < index; i++) {
+                const n = c[i] as TabSetNode | RowNode;
+                p[0] += (h ? n.getMinWidth() : n.getMinHeight());
+                q[0] += (h ? n.getMaxWidth() : n.getMaxHeight());
+                if (i > 0) {
+                    p[0] += ss;
+                    q[0] += ss;
+                }
+            }
+            for (let i = c.length - 1; i >= index; i--) {
+                const n = c[i] as TabSetNode | RowNode;
+                p[1] -= (h ? n.getMinWidth() : n.getMinHeight()) + ss;
+                q[1] -= (h ? n.getMaxWidth() : n.getMaxHeight()) + ss;
             }
         }
 
-        for (let i = c.length - 1; i >= index; i--) {
-            const n = c[i] as TabSetNode | RowNode;
-            p[1] -= (h ? n.getMinWidth() : n.getMinHeight()) + ss;
-            q[1] -= (h ? n.getMaxWidth() : n.getMaxHeight()) + ss;
-        }
-
+        // console.log("getSplitterBounds index", index, "p", p, "q", q, "rtl", rtl);
         p = [Math.max(q[1], p[0]), Math.min(q[0], p[1])];
-
+        // console.log("result bounds", p);
         return p;
     }
 
     /** @internal */
     getSplitterInitials(index: number) {
         const h = this.getOrientation() === Orientation.HORZ;
+        const rtl = this.model.isRtl();
         const c = this.getChildren();
         const ss = this.model.getSplitterSize();
         const initialSizes = [];
@@ -144,7 +163,10 @@ export class RowNode extends Node implements IDropTarget {
         }
 
         const startRect = c[index].getRect()
-        const startPosition = (h ? startRect.x : startRect.y) - ss;
+        let startPosition = (h ? startRect.x : startRect.y) - ss;
+        if (h && rtl) {
+            startPosition = startRect.getRight();
+        }
 
         return { initialSizes, sum, startPosition };
     }
@@ -152,7 +174,14 @@ export class RowNode extends Node implements IDropTarget {
     /** @internal */
     calculateSplit(index: number, splitterPos: number, initialSizes: number[], sum: number, startPosition: number) {
         const h = this.getOrientation() === Orientation.HORZ;
+        const rtl = this.model.isRtl();
+
+        if (h && rtl) {
+            splitterPos = 2 * startPosition - splitterPos;
+        }
+
         const c = this.getChildren();
+        // console.log("calculateSplit index", index, "pos", splitterPos, "start", startPosition, "sizes", initialSizes);
         const sn = c[index] as TabSetNode | RowNode;
         const smax = h ? sn.getMaxWidth() : sn.getMaxHeight();
 
@@ -180,7 +209,7 @@ export class RowNode extends Node implements IDropTarget {
                 }
             }
 
-            for (let i = index+1; i < c.length; i++) {
+            for (let i = index + 1; i < c.length; i++) {
                 const n = c[i] as TabSetNode | RowNode;
                 const m = h ? n.getMaxWidth() : n.getMaxHeight();
                 if (sizes[i] + altShift < m) {
@@ -196,11 +225,11 @@ export class RowNode extends Node implements IDropTarget {
         } else {
             let shift = splitterPos - startPosition;
             let altShift = 0;
-            if (sizes[index-1] + shift > smax) {
-                altShift = sizes[index-1] + shift - smax;
-                sizes[index-1] = smax;
+            if (sizes[index - 1] + shift > smax) {
+                altShift = sizes[index - 1] + shift - smax;
+                sizes[index - 1] = smax;
             } else {
-                sizes[index-1] += shift;
+                sizes[index - 1] += shift;
             }
 
             for (let i = index; i < c.length; i++) {
@@ -215,7 +244,7 @@ export class RowNode extends Node implements IDropTarget {
                 }
             }
 
-            for (let i = index - 1; i >= 0; i--) {
+            for (let i = index - 2; i >= 0; i--) {
                 const n = c[i] as TabSetNode | RowNode;
                 const m = h ? n.getMaxWidth() : n.getMaxHeight();
                 if (sizes[i] + altShift < m) {
@@ -230,9 +259,8 @@ export class RowNode extends Node implements IDropTarget {
 
         // 0.1 is to prevent weight ever going to zero
         const weights = sizes.map(s => Math.max(0.1, s) * 100 / sum);
+        // console.log("result weights", weights);
 
-        // console.log(splitterPos, startPosition, "sizes", sizes);
-        // console.log("weights",weights);
         return weights;
     }
 
@@ -383,15 +411,24 @@ export class RowNode extends Node implements IDropTarget {
 
         if (this.model.isEnableEdgeDock() && this.parent === undefined) {
             if (x < this.rect.x + margin && yy > h / 2 - half && yy < h / 2 + half) {
-                const dockLocation = DockLocation.LEFT;
-                const outlineRect = dockLocation.getDockRect(this.rect);
-                outlineRect.width = outlineRect.width / 2;
+                const dockLocation = this.model.isRtl() ? DockLocation.RIGHT : DockLocation.LEFT;
+                const outlineRect = dockLocation.getDockRect(this.rect, this.model.isRtl());
+                if (this.model.isRtl()) {
+                    outlineRect.width = outlineRect.width / 2;
+                } else {
+                    outlineRect.width = outlineRect.width / 2;
+                }
                 dropInfo = new DropInfo(this, outlineRect, dockLocation, -1, CLASSES.FLEXLAYOUT__OUTLINE_RECT_EDGE);
             } else if (x > this.rect.getRight() - margin && yy > h / 2 - half && yy < h / 2 + half) {
-                const dockLocation = DockLocation.RIGHT;
-                const outlineRect = dockLocation.getDockRect(this.rect);
-                outlineRect.width = outlineRect.width / 2;
-                outlineRect.x += outlineRect.width;
+                const dockLocation = this.model.isRtl() ? DockLocation.LEFT : DockLocation.RIGHT;
+                const outlineRect = dockLocation.getDockRect(this.rect, this.model.isRtl());
+                if (this.model.isRtl()) {
+                    outlineRect.width = outlineRect.width / 2;
+                    outlineRect.x += outlineRect.width;
+                } else {
+                    outlineRect.width = outlineRect.width / 2;
+                    outlineRect.x += outlineRect.width;
+                }
                 dropInfo = new DropInfo(this, outlineRect, dockLocation, -1, CLASSES.FLEXLAYOUT__OUTLINE_RECT_EDGE);
             } else if (y < this.rect.y + margin && xx > w / 2 - half && xx < w / 2 + half) {
                 const dockLocation = DockLocation.TOP;

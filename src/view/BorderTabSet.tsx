@@ -204,10 +204,17 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
     let innerStyle = {};
     let outerStyle = {};
     const borderHeight = size - 1;
-    if (border.getLocation() === DockLocation.LEFT) {
+    const rtl = layout.getModel().isRtl();
+    let location = border.getLocation();
+    if (rtl) {
+        if (location === DockLocation.LEFT) location = DockLocation.RIGHT;
+        else if (location === DockLocation.RIGHT) location = DockLocation.LEFT;
+    }
+
+    if (location === DockLocation.LEFT) {
         innerStyle = { right: "100%", top: 0 };
         outerStyle = { width: borderHeight, overflowY: "auto" };
-    } else if (border.getLocation() === DockLocation.RIGHT) {
+    } else if (location === DockLocation.RIGHT) {
         innerStyle = { left: "100%", top: 0 };
         outerStyle = { width: borderHeight, overflowY: "auto" };
     } else {

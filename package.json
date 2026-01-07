@@ -1,11 +1,11 @@
 {
-  "name": "flexlayout-react",
+  "name": "flexlayout-react-rtl",
   "version": "0.8.17",
-  "description": "A multi-tab docking layout manager",
-  "author": "Caplin Systems Ltd",
+  "description": "A multi-tab docking layout manager with RTL (Right-to-Left) language support",
+  "author": "ig4e (ahmed badr)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/caplin/FlexLayout.git"
+    "url": "git+https://github.com/ig4e/FlexLayout.git"
   },
   "license": "ISC",
   "type": "module",
@@ -51,7 +51,7 @@
     "build:demo": "vite build",
     "build:types": "tsc -p tsconfig-types.json",
     "build:lib": "vite build --config vite.config.lib.ts",
-    "test": "vitest",
+    "test": "vitest --watch=false",
     "playwright": "playwright test --ui",
     "lint": "eslint src/*",
     "doc": "typedoc --out typedoc --exclude \"**/demo/**/*.tsx\" --excludeInternal --disableSources --excludePrivate --excludeProtected --readme none ./src",

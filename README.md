@@ -1,20 +1,22 @@
-# FlexLayout
+# FlexLayout RTL
 
-[![GitHub](https://img.shields.io/github/license/Caplin/FlexLayout)](https://github.com/caplin/FlexLayout/blob/master/LICENSE)
-![npm](https://img.shields.io/npm/dw/flexlayout-react)
-[![npm](https://img.shields.io/npm/v/flexlayout-react)](https://www.npmjs.com/package/flexlayout-react)
+[![GitHub](https://img.shields.io/github/license/ig4e/FlexLayout)](https://github.com/ig4e/FlexLayout/blob/master/LICENSE)
+![npm](https://img.shields.io/npm/dw/flexlayout-react-rtl)
+[![npm](https://img.shields.io/npm/v/flexlayout-react-rtl)](https://www.npmjs.com/package/flexlayout-react-rtl)
+
+> **RTL Fork**: This is a fork of FlexLayout with enhanced Right-to-Left (RTL) language support for Arabic, Hebrew, and other RTL languages.
 
 FlexLayout is a layout manager that arranges React components in multiple tabsets, tabs can be resized and moved.
 
 ![FlexLayout Demo Screenshot](screenshots/Screenshot_light.png?raw=true "FlexLayout Demo Screenshot")
 
-[Run the Demo](https://rawgit.com/caplin/FlexLayout/demos/demos/v0.8/demo/index.html)
+[Run the Demo Locally](#running-the-demo-and-building-the-project)
 
 Try it now using [CodeSandbox](https://codesandbox.io/p/sandbox/yvjzqf)
 
-[API Doc](https://rawgit.com/caplin/FlexLayout/demos/demos/v0.8/typedoc/index.html)
+[API Doc](https://rawgit.com/ig4e/FlexLayout/demos/demos/v0.8/typedoc/index.html)
 
-[Screenshot of Caplin Liberator Explorer using FlexLayout](https://rawgit.com/caplin/FlexLayout/demos/demos/v0.20/images/LiberatorExplorerV3_3.PNG)
+[Screenshot of FlexLayout RTL Demo](screenshots/Screenshot_light.png)
 
 FlexLayout's only dependency is React.
 
@@ -41,16 +43,16 @@ Features:
 
 ## Installation
 
-FlexLayout is in the npm repository. install using:
+FlexLayout RTL is in the npm repository. install using:
 
 ```
-npm install flexlayout-react
+npm install flexlayout-react-rtl
 ```
 
-Import FlexLayout in your modules:
+Import FlexLayout RTL in your modules:
 
 ```
-import {Layout, Model} from 'flexlayout-react';
+import {Layout, Model} from 'flexlayout-react-rtl';
 ```
 
 Include the light, dark, underline, gray, rounded or combined theme by either:
@@ -58,10 +60,10 @@ Include the light, dark, underline, gray, rounded or combined theme by either:
 Adding an import in your js code:
 
 ```
-import 'flexlayout-react/style/light.css';  
+import 'flexlayout-react-rtl/style/light.css';
 ```
 
-or by copying the relevant css from the node_modules/flexlayout-react/style directory to your 
+or by copying the relevant css from the node_modules/flexlayout-react-rtl/style directory to your 
  public assets folder (e.g. public/style) and linking the css in your html:
 
 ```
@@ -196,7 +198,7 @@ Each type of node has a defined set of requires/optional attributes.
 
 Weights on rows and tabsets specify the relative weight of these nodes within the parent row, the actual values do not matter just their relative values (ie two tabsets of weights 30,70 would render the same if they had weights of 3,7).
 
-NOTE: the easiest way to create your initial layout JSON is to use the [demo](https://rawgit.com/caplin/FlexLayout/demos/demos/v0.8/demo/index.html) app, modify one of the
+NOTE: the easiest way to create your initial layout JSON is to use the local [demo](#running-the-demo-and-building-the-project) app, modify one of the
 existing layouts by dragging/dropping and adding nodes then press the 'Show Layout JSON in console' button to print the JSON to the browser developer console.
 
 By changing global or node attributes you can change the layout appearance and functionality, for example:
@@ -485,6 +487,12 @@ pnpm playwright
 <img src="screenshots/PlaywrightUI.png?raw=true" alt="PlaywrightUI" title="PlaywrightUI screenshot"/>
 
 To build the npm distribution run 'pnpm build'.
+
+## Attribution
+
+This project is a fork of the original [FlexLayout](https://github.com/caplin/FlexLayout) by Caplin Systems Ltd, with enhancements for Right-to-Left (RTL) language support.
+
+The original FlexLayout project was created by Caplin Systems Ltd and is licensed under the ISC license. This fork maintains compatibility with the original API while adding RTL-specific improvements.
 
 ## Alternative Layout Managers
 

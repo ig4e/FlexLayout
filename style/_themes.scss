@@ -212,15 +212,16 @@
             border-top-right-radius: 3px;
         }
 
-        &__tab_bottom {
-            box-shadow: inset -2px 0px 5px rgba(0, 0, 0, 0.1);
-            border-bottom-left-radius: 3px;
-            border-bottom-right-radius: 3px;
-        }
-
         &__border_button {
             box-shadow: inset 0 0 5px rgba(0, 0, 0, .15);
             border-radius: 3px;
+        }
+    }
+
+    .flexlayout__rtl {
+        .flexlayout__tab_top,
+        .flexlayout__tab_bottom {
+            box-shadow: inset 2px 0px 5px rgba(0, 0, 0, 0.1);
         }
     }
 }
@@ -351,6 +352,13 @@
         &__border_button {
             box-shadow: inset 0 0 5px rgba(0, 0, 0, .15);
             border-radius: 3px;
+        }
+    }
+
+    .flexlayout__rtl {
+        .flexlayout__tab_button_top,
+        .flexlayout__tab_button_bottom {
+            box-shadow: inset 2px 0px 5px rgba(0, 0, 0, 0.1);
         }
     }
 }
@@ -489,6 +497,14 @@
 
         &__tab_button_textbox {
             border: none;
+        }
+    }
+
+    .flexlayout__rtl {
+        .flexlayout__tabset_tab_divider,
+        .flexlayout__border_tab_divider {
+            border-left: none;
+            border-right: 1px solid #ddd;
         }
     }
 }

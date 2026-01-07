@@ -314,14 +314,15 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
         } else if (this.contentRect!.contains(x, y)) {
             let dockLocation = DockLocation.CENTER;
             if (this.model.getMaximizedTabset((this.parent as RowNode).getWindowId()) === undefined) {
-                dockLocation = DockLocation.getLocation(this.contentRect!, x, y);
+                dockLocation = DockLocation.getLocation(this.contentRect!, x, y, this.model.isRtl());
             }
-            const outlineRect = dockLocation.getDockRect(this.rect);
+            const outlineRect = dockLocation.getDockRect(this.rect, this.model.isRtl());
             dropInfo = new DropInfo(this, outlineRect, dockLocation, -1, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
         } else if (this.tabStripRect != null && this.tabStripRect.contains(x, y)) {
             let r: Rect;
             let yy: number;
             let h: number;
+            const rtl = this.model.isRtl();
             if (this.children.length === 0) {
                 r = this.tabStripRect.clone();
                 yy = r.y + 3;
@@ -332,20 +333,29 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
                 r = child.getTabRect()!;
                 yy = r.y;
                 h = r.height;
-                let p = this.tabStripRect.x;
+                let p = rtl ? this.tabStripRect.getRight() : this.tabStripRect.x;
                 let childCenter = 0;
                 for (let i = 0; i < this.children.length; i++) {
                     child = this.children[i] as TabNode;
                     r = child.getTabRect()!;
                     if (r.y !== yy) {
                         yy = r.y
-                        p = this.tabStripRect.x;
+                        p = rtl ? this.tabStripRect.getRight() : this.tabStripRect.x;
                     }
                     childCenter = r.x + r.width / 2;
-                    if (p <= x && x < childCenter && r.y < y && y < r.getBottom()) {
+                    if (!rtl && p <= x && x < childCenter && r.y < y && y < r.getBottom()) {
                         const dockLocation = DockLocation.CENTER;
                         const outlineRect = new Rect(r.x - 2, r.y, 3, r.height);
                         if (this.rect.x < r.x && r.x < this.rect.getRight()) {
+                            dropInfo = new DropInfo(this, outlineRect, dockLocation, i, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                            break;
+                        } else {
+                            return undefined;
+                        }
+                    } else if (rtl && p >= x && x > childCenter && r.y < y && y < r.getBottom()) {
+                        const dockLocation = DockLocation.CENTER;
+                        const outlineRect = new Rect(r.getRight() - 1, r.y, 3, r.height);
+                        if (this.rect.x < r.getRight() && r.getRight() < this.rect.getRight()) {
                             dropInfo = new DropInfo(this, outlineRect, dockLocation, i, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
                             break;
                         } else {
@@ -355,10 +365,16 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
                     p = childCenter;
                 }
             }
-            if (dropInfo == null && r.getRight() < this.rect!.getRight()) {
-                const dockLocation = DockLocation.CENTER;
-                const outlineRect = new Rect(r.getRight() - 2, yy, 3, h);
-                dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+            if (dropInfo == null) {
+                if (!rtl && r.getRight() < this.rect!.getRight()) {
+                    const dockLocation = DockLocation.CENTER;
+                    const outlineRect = new Rect(r.getRight() - 2, yy, 3, h);
+                    dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                } else if (rtl && r.x > this.rect!.x) {
+                    const dockLocation = DockLocation.CENTER;
+                    const outlineRect = new Rect(r.x - 1, yy, 3, h);
+                    dropInfo = new DropInfo(this, outlineRect, dockLocation, this.children.length, CLASSES.FLEXLAYOUT__OUTLINE_RECT);
+                }
             }
         }
 

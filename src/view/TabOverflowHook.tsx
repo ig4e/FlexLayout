@@ -102,7 +102,13 @@ export const useTabOverflow = (
                 const thumbPos = position * (size - adjust) / scrollSize;
                 if (orientation === Orientation.HORZ) {
                     s.style.width = thumbSize + "px";
-                    s.style.left = thumbPos + "px";
+                    if (layout.getModel().isRtl()) {
+                        s.style.right = thumbPos + "px";
+                        s.style.left = "auto";
+                    } else {
+                        s.style.left = thumbPos + "px";
+                        s.style.right = "auto";
+                    }
                 } else {
                     s.style.height = thumbSize + "px";
                     s.style.top = thumbPos + "px";
@@ -115,7 +121,13 @@ export const useTabOverflow = (
             if (orientation === Orientation.HORZ) {
                 s.style.bottom = "0px";
             } else {
-                s.style.right = "0px";
+                if (layout.getModel().isRtl()) {
+                    s.style.left = "0px";
+                    s.style.right = "auto";
+                } else {
+                    s.style.right = "0px";
+                    s.style.left = "auto";
+                }
             }
         }
     }
@@ -254,7 +266,9 @@ export const useTabOverflow = (
     // orientation helpers:
 
     const getNear = (rect: DOMRect | Rect) => {
-        if (orientation === Orientation.HORZ) {
+        if (orientation === Orientation.HORZ && layout.getModel().isRtl()) {
+            return -rect.right;
+        } else if (orientation === Orientation.HORZ) {
             return rect.x;
         } else {
             return rect.y;
@@ -262,7 +276,9 @@ export const useTabOverflow = (
     };
 
     const getFar = (rect: DOMRect | Rect) => {
-        if (orientation === Orientation.HORZ) {
+        if (orientation === Orientation.HORZ && layout.getModel().isRtl()) {
+            return -rect.x;
+        } else if (orientation === Orientation.HORZ) {
             return rect.right;
         } else {
             return rect.bottom;
@@ -295,7 +311,11 @@ export const useTabOverflow = (
 
     const setScrollPosition = (p: number) => {
         if (orientation === Orientation.HORZ) {
-            tabStripRef.current!.scrollLeft = p;
+            if (layout.getModel().isRtl()) {
+                tabStripRef.current!.scrollLeft = -p;
+            } else {
+                tabStripRef.current!.scrollLeft = p;
+            }
         } else {
             tabStripRef.current!.scrollTop = p;
         }
@@ -303,7 +323,11 @@ export const useTabOverflow = (
 
     const getScrollPosition = (elm: Element) => {
         if (orientation === Orientation.HORZ) {
-            return elm.scrollLeft;
+            if (layout.getModel().isRtl()) {
+                return -elm.scrollLeft;
+            } else {
+                return elm.scrollLeft;
+            }
         } else {
             return elm.scrollTop;
         }

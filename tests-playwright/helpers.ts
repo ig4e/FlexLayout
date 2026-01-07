@@ -1,4 +1,4 @@
-    import { expect, Page, Locator } from '@playwright/test';
+    import { expect, type Page, type Locator } from '@playwright/test';
 
     export const findAllTabSets = (page: Page) => {
         return page.locator('.flexlayout__tabset');
@@ -38,14 +38,15 @@
         }
     };
     
-    export enum Location {
-        CENTER,
-        TOP,
-        BOTTOM,
-        LEFT,
-        RIGHT,
-        LEFTEDGE
-    }
+    export const Location = {
+        CENTER: 0,
+        TOP: 1,
+        BOTTOM: 2,
+        LEFT: 3,
+        RIGHT: 4,
+        LEFTEDGE: 5
+    } as const;
+    export type Location = typeof Location[keyof typeof Location];
     
     function getLocation(rect: { x: number; y: number; width: number; height: number }, loc: Location) {
         switch (loc) {

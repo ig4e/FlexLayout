@@ -378,10 +378,16 @@ export class LayoutInternal extends React.Component<ILayoutInternalProps, ILayou
             </div>;
         }
 
+        let classNames = this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT);
+        if (model.isRtl()) {
+            classNames += " " + this.getClassName(CLASSES.FLEXLAYOUT__RTL);
+        }
+
         return (
             <div
                 ref={this.selfRef}
-                className={this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT)}
+                className={classNames}
+                dir={model.isRtl() ? "rtl" : "ltr"}
                 onDragEnter={this.onDragEnterRaw}
                 onDragLeave={this.onDragLeaveRaw}
                 onDragOver={this.onDragOver}
@@ -496,8 +502,10 @@ export class LayoutInternal extends React.Component<ILayoutInternalProps, ILayou
     renderEdgeIndicators() {
         const edges: React.ReactNode[] = [];
         const arrowIcon = this.icons.edgeArrow;
+        const model = this.props.model;
+        const rtl = model.isRtl();
         if (this.state.showEdges) {
-            const r = this.props.model.getRoot(this.windowId).getRect();
+            const r = model.getRoot(this.windowId).getRect();
             const length = edgeRectLength;
             const width = edgeRectWidth;
             const offset = edgeRectLength / 2;
@@ -508,8 +516,8 @@ export class LayoutInternal extends React.Component<ILayoutInternalProps, ILayou
                     {arrowIcon}
                 </div>
             </div>);
-            edges.push(<div key="West" style={{ top: r.height / 2 - offset, left: 0, width: width, height: length, borderTopRightRadius: radius, borderBottomRightRadius: radius }} className={className + " " + this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT)}>
-                <div style={{ transform: "rotate(90deg)" }}>
+            edges.push(<div key="West" style={{ top: r.height / 2 - offset, left: rtl ? r.width - width : 0, width: width, height: length, borderTopRightRadius: radius, borderBottomRightRadius: radius }} className={className + " " + this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT)}>
+                <div style={{ transform: rtl ? "rotate(-90deg)" : "rotate(90deg)" }}>
                     {arrowIcon}
                 </div>
             </div>);
@@ -518,8 +526,8 @@ export class LayoutInternal extends React.Component<ILayoutInternalProps, ILayou
                     {arrowIcon}
                 </div>
             </div>);
-            edges.push(<div key="East" style={{ top: r.height / 2 - offset, left: r.width - width, width: width, height: length, borderTopLeftRadius: radius, borderBottomLeftRadius: radius }} className={className + " " + this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT)}>
-                <div style={{ transform: "rotate(-90deg)" }}>
+            edges.push(<div key="East" style={{ top: r.height / 2 - offset, left: rtl ? 0 : r.width - width, width: width, height: length, borderTopLeftRadius: radius, borderBottomLeftRadius: radius }} className={className + " " + this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT)}>
+                <div style={{ transform: rtl ? "rotate(90deg)" : "rotate(-90deg)" }}>
                     {arrowIcon}
                 </div>
             </div>);
@@ -1301,11 +1309,12 @@ const defaultIcons = {
     activeTabset: <AsterickIcon />
 };
 
-enum DragSource {
-    Internal = "internal",
-    External = "external",
-    Add = "add"
-}
+const DragSource = {
+    Internal: "internal",
+    External: "external",
+    Add: "add"
+} as const;
+type DragSource = typeof DragSource[keyof typeof DragSource];
 
 /** @internal */
 const defaultSupportsPopout: boolean = isDesktop();

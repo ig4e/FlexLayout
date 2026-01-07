@@ -52,6 +52,16 @@ function App() {
 
     const load = (jsonText: string) => {
         const json = JSON.parse(jsonText);
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        if (params.get("rtl") === "true") {
+            if (json.global) {
+                json.global.enableRtl = true;
+            } else {
+                json.global = { enableRtl: true };
+            }
+        }
+
         const model = Model.fromJson(json);
         // model.setOnCreateTabSet((tabNode?: TabNode) => {
         //     console.log("onCreateTabSet " + tabNode);

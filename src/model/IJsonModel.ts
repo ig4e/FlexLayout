@@ -129,6 +129,13 @@ export interface IGlobalAttributes {
 	borderSize?: number;
 
 	/**
+	  enable right-to-left layout
+
+	  Default: false
+	 */
+	enableRtl?: boolean;
+
+	/**
 	  enable docking to the edges of the layout, this will show the edge indicators
 
 	  Default: true
