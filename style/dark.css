@@ -295,6 +295,30 @@
 .flexlayout__tabset-maximized {
   background-color: var(--color-tabset-background-maximized);
 }
+.flexlayout__rtl .flexlayout__tabset_header {
+  padding: 3px 5px 3px 3px;
+}
+.flexlayout__rtl .flexlayout__tab_toolbar {
+  padding-left: 0.3em;
+  padding-right: 0.5em;
+}
+.flexlayout__rtl .flexlayout__tab_toolbar_sticky_buttons_container {
+  padding-left: 0px;
+  padding-right: 5px;
+}
+.flexlayout__rtl .flexlayout__tab_button_textbox {
+  border: 1px inset var(--color-1);
+}
+.flexlayout__rtl .flexlayout__border_inner_tab_container_left {
+  flex-direction: row;
+  transform-origin: top left;
+  transform: rotate(90deg);
+}
+.flexlayout__rtl .flexlayout__border_inner_tab_container_right {
+  flex-direction: row-reverse;
+  transform-origin: top right;
+  transform: rotate(-90deg);
+}
 .flexlayout__tab_button_stamp {
   display: inline-flex;
   align-items: center;
@@ -698,14 +722,14 @@
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }
-.flexlayout__tab_bottom {
-  box-shadow: inset -2px 0px 5px rgba(0, 0, 0, 0.1);
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-}
 .flexlayout__border_button {
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.15);
   border-radius: 3px;
+}
+
+.flexlayout__rtl .flexlayout__tab_top,
+.flexlayout__rtl .flexlayout__tab_bottom {
+  box-shadow: inset 2px 0px 5px rgba(0, 0, 0, 0.1);
 }
 
 /*# sourceMappingURL=dark.css.map */

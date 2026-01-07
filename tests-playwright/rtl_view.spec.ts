@@ -619,7 +619,6 @@ test.describe('RTL Splitters', () => {
     await dragSplitter(page, from, false, 1000); // to right edge
     await dragSplitter(page, from, false, -100); // 100px back
 
-    const e1 = findPath(page, '/ts1'); // Left
     // ts1 (Left) should be huge. ts0 (Right) should be 100px.
     // Wait, test LTR: vsplitter to edge right (1000) -> ts0 grows, ts1 shrinks (to 0).
     // Back -100 -> ts1 becomes 100.

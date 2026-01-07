@@ -73,6 +73,108 @@ or by copying the relevant css from the node_modules/flexlayout-react-rtl/style 
 [How to change the theme dynamically in code](#dynamically-changing-the-theme)
 
 
+## Enabling RTL (Right-to-Left) Support
+
+FlexLayout RTL provides full support for right-to-left languages such as Arabic, Hebrew, Urdu, and Persian. To enable RTL mode:
+
+### 1. Set the HTML `dir` attribute
+
+Set `dir="rtl"` on your HTML document or root container element:
+
+```html
+<html dir="rtl">
+  <!-- your app -->
+</html>
+```
+
+Or in your React component:
+
+```jsx
+<div dir="rtl">
+  <Layout model={model} factory={factory} />
+</div>
+```
+
+### 2. Enable RTL in the Layout Model
+
+Add `enableRtl: true` to the `global` section of your layout configuration:
+
+```javascript
+const json = {
+    global: {
+        enableRtl: true
+    },
+    borders: [],
+    layout: {
+        // ... rest of layout configuration
+    }
+};
+```
+
+### 3. Optionally Set RTL-specific CSS
+
+Include the RTL stylesheet if you want CSS adjustments for RTL layouts:
+
+```jsx
+import 'flexlayout-react-rtl/style/light.css'; // includes RTL support
+```
+
+All theme files (`light.css`, `dark.css`, `gray.css`, `rounded.css`, `underline.css`, `combined.css`) include built-in RTL support.
+
+### Complete RTL Example
+
+```jsx
+import React from 'react';
+import { Layout, Model } from 'flexlayout-react-rtl';
+import 'flexlayout-react-rtl/style/light.css';
+
+const json = {
+    global: {
+        enableRtl: true
+    },
+    borders: [],
+    layout: {
+        type: "row",
+        weight: 100,
+        children: [
+            {
+                type: "tabset",
+                weight: 50,
+                children: [
+                    {
+                        type: "tab",
+                        name: "الأول",
+                        component: "placeholder"
+                    }
+                ]
+            }
+        ]
+    }
+};
+
+export default function App() {
+    const model = Model.fromJson(json);
+    
+    const factory = (node) => {
+        return <div>{node.getName()}</div>;
+    };
+    
+    return (
+        <div dir="rtl">
+            <Layout model={model} factory={factory} />
+        </div>
+    );
+}
+```
+
+### RTL Behavior Notes
+
+- In RTL mode, the layout will automatically mirror the visual presentation
+- Left/Right borders are visually swapped (left border appears on the right side, vice versa)
+- Tab ordering and drag-and-drop operations work intuitively for RTL users
+- All splitters and resizing operations respect the RTL direction
+- Text input and tab names follow the RTL text direction
+
 ## Usage
 
 The `<Layout>` component renders the tabsets and splitters, it takes the following props:
